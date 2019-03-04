@@ -8,3 +8,11 @@ In addition to this, if the app is running and removed from the battery optimiza
 turn OFF the wifi when entering DOZE mode & turn it back on when leaving DOZE.
 
 
+The first time you install the APK, you must ENABLE USB DEBUGGING & paste these commands ( all in once ) into your terminal with your phone attached:
+  ./adb -d shell am force-stop com.MichaelAnzalone.BetterBatteryLife; \
+  ./adb -d shell pm grant com.MichaelAnzalone.BetterBatteryLife android.permission.WRITE_SECURE_SETTINGS
+  
+  - Once this is done, you can disable usb debugging and run the application.
+  - You will only ever have to run these commands again if you uninstall,re-install the APP.
+    -- For this reason, when a new one comes out, upgrade the application ( instead of uninstalling & re-installing ), so you          don't have to run these commands again.
+
