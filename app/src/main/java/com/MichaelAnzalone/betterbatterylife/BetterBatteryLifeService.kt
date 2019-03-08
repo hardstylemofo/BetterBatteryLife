@@ -34,12 +34,12 @@ class BetterBatteryLifeService : Service() {
     var versionCode = BuildConfig.VERSION_CODE
     var versionName = BuildConfig.VERSION_NAME
 
-    var listeningToDOZEEvents = false
-
     /** indicates whether onRebind should be used  */
     var mAllowRebind: Boolean = false
 
     var dozeReceiver: BroadcastReceiver? = null
+
+    var screenReceiver: BroadcastReceiver? = null
 
     fun CheckDOZEPermissions() : Boolean {
 
@@ -63,28 +63,37 @@ class BetterBatteryLifeService : Service() {
         // Listen for DOZE state changes:
         RegisterDozeState()
 
-        if(CheckDOZEPermissions()){
-            SetupOptimizedDozeParams()
+        // Listen for screen ON events:
+        RegisterScreenState()
+
+        if(!CheckDOZEPermissions()){
+            return
         }
+
+        SetupOptimizedDozeParams()
     }
 
     fun SetupOptimizedDozeParams() {
-        val optimizedConfig = "inactive_to=15000," +
-                "sensing_to=0,"      +
-                "locating_to=0,"     +
-                "location_accuracy=20.0," +
-                "motion_inactive_to=0," +
-                "idle_after_inactive_to=0," +
-                "idle_pending_to=60000," +
-                "max_idle_pending_to=120000," +
-                "idle_pending_factor=2.0," +
-                "idle_to=900000," +
-                "max_idle_to=86400000," +
-                "idle_factor=2.0," +
-                "min_time_to_alarm=600000," +
-                "max_temp_app_whitelist_duration=10000," +
-                "mms_temp_app_whitelist_duration=10000," +
-                "sms_temp_app_whitelist_duration=10000"
+        val optimizedConfig = "inactive_to=10000," +
+                    "sensing_to=0," +
+                    "locating_to=0," +
+                    "location_accuracy=20.0," +
+                    "motion_inactive_to=0," +
+                    "idle_after_inactive_to=0," +
+                    "idle_pending_to=30000," +
+                    "max_idle_pending_to=120000," +
+                    "idle_pending_factor=2.0," +
+                    "idle_to=1000000," +
+                    "max_idle_to=86400000," +
+                    "idle_factor=2.0," +
+                    "min_time_to_alarm=600000," +
+                    "max_temp_app_whitelist_duration=10000," +
+                    "mms_temp_app_whitelist_duration=10000," +
+                    "sms_temp_app_whitelist_duration=10000," +
+                    "light_idle_to=120000," +
+                    "light_idle_maintenance_min_budget=60000," +
+                    "light_idle_maintenance_max_budget=120000," +
+                    "wait_for_unlock=true" // May delay notifications on On Screen Displays...
 
         val config = Settings.Global.getString(baseContext.contentResolver,
             "device_idle_constants")
@@ -150,62 +159,101 @@ class BetterBatteryLifeService : Service() {
         }
     }
 
-    fun RegisterDozeState() {
+    fun RegisterScreenState() {
         val filter = IntentFilter()
-        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-        filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
+        filter.addAction(Intent.ACTION_SCREEN_ON)
 
-        //registerReceiver(object : BroadcastReceiver() {
-        dozeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
+        val wifi = getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-                var wifi = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        screenReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val strAction = intent.action
 
-                if(pm.isDeviceIdleMode) // Entered DOZE?:
-                {
-                    if( checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED ) {
+                if (strAction == Intent.ACTION_SCREEN_ON) {
 
-                        // Yes, turn OFF wifi:
-                        val turnedOFFWifi = wifi.setWifiEnabled(false)// true or false to activate/deactivate wifi
-
-                        if( !turnedOFFWifi ) {
-                            Log.d(
-                                "DEBUG/DOZE/WIFI_COULD_NOT_BE_OFF", "intent action=" + intent.action
-                                        + " idleMode=" + pm.isDeviceIdleMode
-                            )
-                        }
-
-                        Log.d(
-                            "DEBUG/DOZE/WIFI_OFF", "intent action=" + intent.action
-                                    + " idleMode=" + pm.isDeviceIdleMode
-                        )
-                    }
-                }
-                else
-                {
                     if( checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED ) {
                         // No, turn ON wifi:
                         val turnedONWifi = wifi.setWifiEnabled(true)
 
                         if( !turnedONWifi ) {
                             Log.d(
-                                "DEBUG/DOZE/WIFI_COULD_NOT_BE_ON", "intent action=" + intent.action
-                                        + " idleMode=" + pm.isDeviceIdleMode
+                                "DEBUG/SCREEN/WIFI_COULD_NOT_BE_ON", "intent action=" + intent.action
+
                             )
                         }
+                        else {
 
-                        Log.d(
-                            "DEBUG/DOZE/WIFI_ON", "intent action=" + intent.action
-                                    + " idleMode=" + pm.isDeviceIdleMode
-                        )
+                            Log.d(
+                                "DEBUG/SCREEN/WIFI_ON", "intent action=" + intent.action
+
+                            )
+                        }
                     }
+
                 }
             }
-        }//, filter)
+        }
+
+        registerReceiver( screenReceiver, filter )
+    }
+
+    fun RegisterDozeState() {
+        val filter = IntentFilter()
+        filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
+
+        dozeReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+
+                onDozeWifiEvent(intent)
+
+            }//, filter)
+        }
 
         registerReceiver( dozeReceiver, filter )
+    }
 
-        listeningToDOZEEvents = true
+    fun onDozeWifiEvent(intent: Intent) {
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val wifi = getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+        if (pm.isDeviceIdleMode) // Entered DOZE?:
+        {
+            if (checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
+
+                // Yes, turn OFF wifi:
+                val turnedOFFWifi = wifi.setWifiEnabled(false)// true or false to activate/deactivate wifi
+
+                if (!turnedOFFWifi) {
+                    Log.d(
+                        "DEBUG/DOZE/WIFI_COULD_NOT_BE_OFF", "intent action=" + intent.action
+                                + " idleMode=" + pm.isDeviceIdleMode
+                    )
+                } else {
+                    Log.d(
+                        "DEBUG/DOZE/WIFI_OFF", "intent action=" + intent.action
+                                + " idleMode=" + pm.isDeviceIdleMode
+                    )
+                }
+            }
+        } else {
+            if (checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
+                // No, turn ON wifi:
+                val turnedONWifi = wifi.setWifiEnabled(true)
+
+                if (!turnedONWifi) {
+                    Log.d(
+                        "DEBUG/DOZE/WIFI_COULD_NOT_BE_ON", "intent action=" + intent.action
+                                + " idleMode=" + pm.isDeviceIdleMode
+                    )
+                } else {
+
+                    Log.d(
+                        "DEBUG/DOZE/WIFI_ON", "intent action=" + intent.action
+                                + " idleMode=" + pm.isDeviceIdleMode
+                    )
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -278,11 +326,16 @@ class BetterBatteryLifeService : Service() {
 
         //nManager.cancel(R.string.remote_service_started)
 
-        if(this.listeningToDOZEEvents)
+        if(dozeReceiver != null )
         {
             // Stop listening to DOZE events, we are shutting down:
             this.unregisterReceiver(dozeReceiver)
         }
+
+       if(screenReceiver != null )
+       {
+           this.unregisterReceiver(screenReceiver)
+       }
 
         var toast = Toast.makeText(
             applicationContext, "BetterBatteryLifeService stopped.",

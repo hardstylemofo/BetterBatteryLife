@@ -18,7 +18,7 @@ class OnBootService : BroadcastReceiver()
 
         val i = Intent(context, BetterBatteryLifeService::class.java)
 
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
+        if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED || intent.action == Intent.ACTION_BOOT_COMPLETED) {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService( i )
