@@ -402,7 +402,7 @@ class BetterBatteryLifeService : Service() {
             if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED) {
 
                 // Are there no devices connected to bluetooth?:
-                if (deviceHasBluetooth() && turnBluetoothBackOn && !isBluetoothHeadsetConnected() ) {
+                if (deviceHasBluetooth() && turnBluetoothBackOn ) {
 
                     // No, we can turn it ON:
                     val turnedONBluetooth = enableBluetooth(true)
