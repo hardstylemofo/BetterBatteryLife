@@ -18,12 +18,16 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
 import android.Manifest
+import android.app.ActionBar
 import android.app.PendingIntent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import androidx.core.app.ActivityCompat
 
 class MainActivity : AppCompatActivity() {
+
+    var versionCode = BuildConfig.VERSION_CODE
+    var version = BuildConfig.VERSION_NAME
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
@@ -141,6 +145,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
 
         // Make sure the service is started ( it already should be on boot ):
