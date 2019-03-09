@@ -335,12 +335,12 @@ class BetterBatteryLifeService : Service() {
             if (checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
 
                 // Now, turn OFF wifi:
-                val turnedOFFWifi = wifi.setWifiEnabled(false)// true or false to activate/deactivate wifi
+                var turnedOFFWifi = wifi.setWifiEnabled(false)// true or false to activate/deactivate wifi
 
                 if (!turnedOFFWifi) {
                     Log.d(
                         "DEBUG/DOZE/WIFI_COULD_NOT_BE_OFF", "intent action=" + intent.action
-                                + " idleMode=" + pm.isDeviceIdleMode
+                                + " idleMode=" + pm.isDeviceIdleMode + " wifi state =" + wifi.wifiState
                     )
                 } else {
 
@@ -445,10 +445,11 @@ class BetterBatteryLifeService : Service() {
         var isEnabled = false
 
         if ( bluetoothAdapter != null ) {
-            isEnabled = bluetoothAdapter.isEnabled
-            if (enable && !isEnabled) {
+            //isEnabled = isBluetoothOn()
+
+            if (enable) {
                 return bluetoothAdapter.enable()
-            } else if (!enable && isEnabled) {
+            } else {
                 return bluetoothAdapter.disable()
             }
         }
