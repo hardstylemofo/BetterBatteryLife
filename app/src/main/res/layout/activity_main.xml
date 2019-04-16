@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         tools:context=".MainActivity" android:alwaysDrawnWithCache="false"
         android:background="@android:color/black" android:hapticFeedbackEnabled="true"
-        android:isScrollContainer="true">
-
+        android:isScrollContainer="true" android:visibility="visible">
 
     <TextView
             android:id="@+id/message"
@@ -28,5 +28,103 @@
             android:id="@+id/btnUpdateSettings"
             android:layout_alignParentBottom="true"
             android:textSize="24sp" android:visibility="visible" android:enabled="false"/>
+
+
+    <TextView
+            android:id="@+id/lblSettings"
+            android:text="Settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_above="@id/divider1"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:visibility="visible"
+            android:textSize="18sp"
+            tools:text="Settings"
+            android:textAlignment="viewStart"
+            android:textColor="@color/colorAccent"/>
+
+    <View
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_height="1dp"
+            android:layout_above="@id/chbDisableWifiDeepSleep"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="visible"
+    />
+
+    <Switch
+            android:text="Disable Wifi During Deep Sleep"
+            android:id="@+id/chbDisableWifiDeepSleep"
+            android:layout_alignParentStart="true"
+            android:layout_above="@id/chbDisableBluetoothDeepSleep"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:checked="true"
+            android:buttonTint="@color/colorAccent" android:clickable="true"
+            android:textColor="@android:color/white" android:textStyle="bold" android:textAlignment="viewStart"
+            android:visibility="visible" android:textSize="18sp" android:layout_height="wrap_content"
+            android:layout_width="match_parent" android:duplicateParentState="false" android:enabled="false"
+    />
+
+    <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_height="1dp"
+            android:layout_above="@id/chbDisableBluetoothDeepSleep"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="visible"
+    />
+
+    <Switch
+            android:text="Disable Bluetooth During Deep Sleep"
+            android:id="@+id/chbDisableBluetoothDeepSleep"
+            android:layout_alignParentStart="true"
+            android:layout_above="@id/btnUpdateSettings"
+            android:layout_marginBottom="40dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:checked="true"
+            android:buttonTint="@color/colorAccent" android:clickable="true"
+            android:textColor="@android:color/white" android:textStyle="bold" android:textAlignment="viewStart"
+            android:visibility="visible" android:textSize="18sp" android:layout_height="wrap_content"
+            android:layout_width="match_parent" android:duplicateParentState="false" android:enabled="false"
+    />
+
+    <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_height="1dp"
+            android:layout_above="@id/btnUpdateSettings"
+            android:layout_marginBottom="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/darker_gray"
+    />
+
+    <TextView
+            android:id="@+id/lblInfo"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="0dp"
+            android:layout_below="@id/message"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="40dp"
+            android:buttonTint="@color/colorAccent" android:clickable="true"
+            android:textColor="@color/colorAccent" android:textAlignment="viewStart"
+            android:visibility="visible" android:textSize="16sp" android:layout_height="wrap_content"
+            android:layout_width="match_parent" android:duplicateParentState="false" android:enabled="false"/>
 
 </RelativeLayout>
