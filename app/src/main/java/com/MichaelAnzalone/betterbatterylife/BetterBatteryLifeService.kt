@@ -79,8 +79,8 @@ class BetterBatteryLifeService : Service() {
     @Volatile private var screenOffBatteryPercentageNumPoints: Float = 1f // Start on the 1st data point.
 
     @Volatile private var lastUnplugTime: String = ""
-    @Volatile private var screenOffBatteryDrainPerHour: Double = 0.0 // How many % the battery dropped during the last screen off.
-    @Volatile private var screenOffBatteryDrainPerHourSum: Double = 0.0
+    @Volatile private var screenOffBatteryDrainPerHour: Float = 0f // How many % the battery dropped during the last screen off.
+    @Volatile private var screenOffBatteryDrainPerHourSum: Float = 0f
     @Volatile private var screenOffTimeNanoSeconds: Long = 0
     @Volatile private var deepDozeCount: ULong = 1UL // How many deep dozes since screen off.
     @Volatile private var sensorControlError: String = ""
@@ -143,7 +143,7 @@ class BetterBatteryLifeService : Service() {
             // Now, handle the first start:
             super.onStartCommand(intent, flags, startId)
 
-            // Enable the persistant notification required, to keep this foreground
+            // Enable the persistent notification required, to keep this foreground
             //  service running forever:
             customNotification("Service Info", BetterBatteryLifeService.PERSISTANT_NOTIFICATION_ID)
 
@@ -161,7 +161,7 @@ class BetterBatteryLifeService : Service() {
     }
 
 
-    fun SetupOptimizedDozeParams(showToastNotifications: Boolean) : Boolean {
+    fun SetupOptimizedDozeParams(showToastNotifications: Boolean, stayInDozeUntilUnlocked: Boolean = false) : Boolean {
         var result = false
 
         /// Greenify's aggressive doze settings:
@@ -195,7 +195,7 @@ class BetterBatteryLifeService : Service() {
             wait_for_unlock=false
          */
 
-        val optimizedConfig =
+        var optimizedConfig =
                "light_after_inactive_to=180000," +
                "light_pre_idle_to=0," +
                "light_idle_to=300000," +
@@ -214,6 +214,7 @@ class BetterBatteryLifeService : Service() {
                "idle_pending_to=60000," +
                "max_idle_pending_to=120000," +
                "idle_pending_factor=1.0," +
+               //"idle_to=3600000," +        // After screen off, stay in Deep sleep for 1 hours. <--- First deep sleep duration after screen off.
                "idle_to=7200000," +        // After screen off, stay in Deep sleep for 2 hours. <--- First deep sleep duration after screen off.
                "max_idle_to=36000000," +   // Stay in deep sleep for 10 hours for the following deep sleeps. <--- 2nd ( or more ) deep sleep durations.
                "idle_factor=2.0," +
@@ -221,9 +222,19 @@ class BetterBatteryLifeService : Service() {
                "max_temp_app_whitelist_duration=60000," +
                "mms_temp_app_whitelist_duration=30000," +
               "sms_temp_app_whitelist_duration=20000," +
-              "notification_whitelist_duration=30000," +
-              "wait_for_unlock=false"
+              "notification_whitelist_duration=30000,"
 
+        // Should we stay in doze until the user unlocks the phone?:
+        if(stayInDozeUntilUnlocked)
+        {
+            // Yes:
+            optimizedConfig +=  "wait_for_unlock=true"
+        }
+        else
+        {
+            // No, come out of doze, even if the phone is not unlocked.
+            optimizedConfig +=  "wait_for_unlock=false"
+        }
 
 //        val optimizedConfig = "inactive_to=10000," + // After 10 seconds, enter DEEP DOZE.
 //                "sensing_to=0," +                    // Ignore sensors when entering DEEP/Light DOZE.
@@ -405,15 +416,15 @@ class BetterBatteryLifeService : Service() {
         val wifi = getSystemService(Context.WIFI_SERVICE) as WifiManager
 
         // Should we turn off battery saver mode?:
-        if(checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS) == PackageManager.PERMISSION_GRANTED && inBatterySaverMode() && turnBatterySaverOff )
-        {
-            // Yes:, try to turn off the battery saver:
-            if( !Settings.Global.putInt(this.contentResolver, "low_power", 0) )
-            {
-                // Could not disable the battery saver!:
-                batterySaverError = "ERROR: Could not disable the battery saver!"
-            }
-        }
+//        if(checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS) == PackageManager.PERMISSION_GRANTED && inBatterySaverMode() && turnBatterySaverOff )
+//        {
+//            // Yes:, try to turn off the battery saver:
+//            if( !Settings.Global.putInt(this.contentResolver, "low_power", 0) )
+//            {
+//                // Could not disable the battery saver!:
+//                batterySaverError = "ERROR: Could not disable the battery saver!"
+//            }
+//        }
 
         if (checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
             // No, turn ON wifi:
@@ -502,7 +513,7 @@ class BetterBatteryLifeService : Service() {
 //
 //            // Figure out the instantaneous screen off battery drain per hour:
             //screenOffBatteryDrainPerHour = ( screenOffBatteryDrain / elapsedHoursSinceScreenOff )
-            screenOffBatteryDrainPerHour = screenOffBatteryDrain * 1.0
+            screenOffBatteryDrainPerHour = screenOffBatteryDrain * 1f
 
                     // Calculate & update the sum off the total screen off battery drain per hour data points:
             //screenOffBatteryDrainPerHourSum += screenOffBatteryDrainPerHour
@@ -515,7 +526,7 @@ class BetterBatteryLifeService : Service() {
 //            ++screenOffBatteryPercentageNumPoints
 
             // Make sure there was some battery drain ( user didn't turn off/on phone real quick ).
-            if (screenOffBatteryDrainPerHourSum > 0.0) {
+            if (screenOffBatteryDrainPerHourSum > 0f) {
                 // Update the persistent notification:
                 notification = updateNotificationContents(
                     String.format("%.2f%% total screen off lost since unplugged.", screenOffBatteryDrainPerHourSum),
@@ -535,7 +546,7 @@ class BetterBatteryLifeService : Service() {
         }
         else // No change, reset the screen off battery drain per hour for the GUI:
         {
-            screenOffBatteryDrainPerHour = 0.0
+            screenOffBatteryDrainPerHour = 0f
 
             // Also let the GUI know ( if it's running ):
             onActionGetSettings()
@@ -551,8 +562,6 @@ class BetterBatteryLifeService : Service() {
 
         screenReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                val strAction = intent.action
-
                 if( intent.action == Intent.ACTION_SCREEN_ON ) {
                     onScreenON(intent)
                 }
@@ -571,13 +580,14 @@ class BetterBatteryLifeService : Service() {
 
         dozeReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                onDozeWifiEvent(intent)
+                val quietHours = onDozeWifiEvent(intent)
 
                 // If we have access to the doze settings, see if they have been changed by other service
                 //  like the play services, ( which is known to revert them back every once and a while grrrrr. ) and
                 //  change them if necessary.
                 if (CheckDOZEPermissions()) {
-                    SetupOptimizedDozeParams(false)
+                    // Keep in doze mode ( until user unlocks it ) only if we are in quiet hours:
+                    SetupOptimizedDozeParams(false, quietHours)
                 }
             }
         }
@@ -635,7 +645,8 @@ class BetterBatteryLifeService : Service() {
                                    wifi.wifiState == WifiManager.WIFI_STATE_ENABLING ) )
     }
 
-    fun onDozeWifiEvent(intent: Intent) {
+    // Returns true, if we are in quiethours:
+    fun onDozeWifiEvent(intent: Intent) : Boolean {
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val wifi = getSystemService(Context.WIFI_SERVICE) as WifiManager
 
@@ -667,7 +678,10 @@ class BetterBatteryLifeService : Service() {
 
         // When to allow the battery saver to be turned off and on, only if it was disabled on screen off.
         // - If the user had battery saver on, we will just leave it on.
-        var allowBatterySaverControl = quietHours || ( allowWifiControl && turnBatterySaverOff ) // turnBatterySaverOff is based off of the battery saver setting at screen OFF.
+//        var allowBatterySaverControl = quietHours || ( allowWifiControl && turnBatterySaverOff ) // turnBatterySaverOff is based off of the battery saver setting at screen OFF.
+
+        // disable this for now due to problems on samsung devices:
+        var allowBatterySaverControl = false
 
         // For WIFI, don't allow wifi control if we are in airplane mode ( as it's not allowed ):
         allowWifiControl = ( allowWifiControl && !inAirplaneMode() )
@@ -802,6 +816,8 @@ class BetterBatteryLifeService : Service() {
                 }
             }
         }
+
+        return quietHours
     }
 
     fun deviceHasBluetooth(): Boolean {
@@ -1158,8 +1174,8 @@ class BetterBatteryLifeService : Service() {
                     Intent.ACTION_POWER_DISCONNECTED -> { // User unplugged the power
                         // Reset the number of data points collected & the average for the screen off battery drain data:
                         screenOffBatteryPercentageNumPoints = 1f // Start on the 1st data point.
-                        screenOffBatteryDrainPerHourSum = 0.0
-                        screenOffBatteryDrainPerHour = 0.0
+                        screenOffBatteryDrainPerHourSum = 0f
+                        screenOffBatteryDrainPerHour = 0f
 
                         deepDozeCount = 1UL
 
@@ -1190,8 +1206,8 @@ class BetterBatteryLifeService : Service() {
                     else -> { // User plugged in the power
                         // Reset the number of data points collected & the average for the screen off battery drain data:
                         screenOffBatteryPercentageNumPoints = 1f // Start on the 1st data point.
-                        screenOffBatteryDrainPerHourSum = 0.0
-                        screenOffBatteryDrainPerHour = 0.0
+                        screenOffBatteryDrainPerHourSum = 0f
+                        screenOffBatteryDrainPerHour = 0f
 
                         lastUnplugTime = ""
                         unplugTimeSeconds = 0
