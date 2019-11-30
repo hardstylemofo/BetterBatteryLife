@@ -18,8 +18,8 @@ android {
         applicationId 'com.MichaelAnzalone.BetterBatteryLife'
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 34
-        versionName '0.63'
+        versionCode 35
+        versionName '0.64'
         signingConfig signingConfigs.config
     }
     buildTypes {

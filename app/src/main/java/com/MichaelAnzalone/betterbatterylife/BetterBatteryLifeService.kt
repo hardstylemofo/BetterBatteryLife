@@ -1201,6 +1201,30 @@ class BetterBatteryLifeService : Service() {
 
                         // NOTE: The notification does not need to update until the screen get's turned back on,
                         //          as we are measuring the screen OFF battery drain only.
+
+                        // Finally make sure that the doze settings are set to ours, just in case the google play store reverted them:
+                        // Force enter deep sleep:
+                        try {
+                            if( CheckDOZEPermissions() ) {
+                                SetupOptimizedDozeParams(false)
+                            }
+
+                        } catch (e: Exception) {
+
+                            // show a toast notification if it failed:
+                            var toast = Toast.makeText(
+                                context, e.message,
+                                Toast.LENGTH_LONG
+                            )
+
+                            toast.setGravity(
+                                Gravity.CENTER,
+                                0,
+                                0
+                            )
+
+                            toast.show()
+                        }
                     }
 
                     else -> { // User plugged in the power
