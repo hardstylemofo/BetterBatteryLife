@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.MichaelAnzalone.BetterBatteryLife",
+  "variantName": "release",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "properties": [],
+      "versionCode": 36,
+      "versionName": "0.65",
+      "enabled": true,
+      "outputFile": "BetterBatteryLife.apk"
+    }
+  ]
+}
