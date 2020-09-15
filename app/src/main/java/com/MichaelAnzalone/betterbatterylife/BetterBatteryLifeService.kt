@@ -219,10 +219,40 @@ class BetterBatteryLifeService : Service() {
                "max_idle_to=36000000," +   // Stay in deep sleep for 10 hours for the following deep sleeps. <--- 2nd ( or more ) deep sleep durations.
                "idle_factor=2.0," +
                "min_time_to_alarm=3600000," // Every 60 minutes
-               "max_temp_app_whitelist_duration=60000," +
-               "mms_temp_app_whitelist_duration=30000," +
+               "max_temp_app_whitelist_duration=120000," +
+               "mms_temp_app_whitelist_duration=60000," +
               "sms_temp_app_whitelist_duration=20000," +
               "notification_whitelist_duration=30000,"
+//
+//         // MAX BATTERY SAVING, these are the settings that we always used :
+//        var optimizedConfig =
+//               "light_after_inactive_to=180000," +
+//               "light_pre_idle_to=0," +
+//               "light_idle_to=300000," +
+//               "light_idle_factor=2.0," +
+//               "light_max_idle_to=300000," + // 5 minutes
+//               "light_idle_maintenance_min_budget=60000," +
+//               "light_idle_maintenance_max_budget=300000," +
+//               "min_light_maintenance_time=5000," +
+//               "min_deep_maintenance_time=30000," +
+//               "inactive_to=10000," +
+//               "sensing_to=0," +
+//               "locating_to=0," +
+//               "location_accuracy=20.0," +
+//               "motion_inactive_to=0," +
+//               "idle_after_inactive_to=0," +
+//               "idle_pending_to=60000," +
+//               "max_idle_pending_to=120000," +
+//               "idle_pending_factor=1.0," +
+//               //"idle_to=3600000," +        // After screen off, stay in Deep sleep for 1 hours. <--- First deep sleep duration after screen off.
+//               "idle_to=7200000," +        // After screen off, stay in Deep sleep for 2 hours. <--- First deep sleep duration after screen off.
+//               "max_idle_to=36000000," +   // Stay in deep sleep for 10 hours for the following deep sleeps. <--- 2nd ( or more ) deep sleep durations.
+//               "idle_factor=2.0," +
+//               "min_time_to_alarm=3600000," // Every 60 minutes
+//               "max_temp_app_whitelist_duration=60000," +
+//               "mms_temp_app_whitelist_duration=30000," +
+//              "sms_temp_app_whitelist_duration=20000," +
+//              "notification_whitelist_duration=30000,"
 
         // Should we stay in doze until the user unlocks the phone?:
         if(stayInDozeUntilUnlocked)
