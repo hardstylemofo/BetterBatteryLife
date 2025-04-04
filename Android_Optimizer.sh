@@ -7,11 +7,14 @@ readonly ADB_DEVICE=$( adb devices | awk 'NR==2{print $1}' )
 
 echo "Optimizing the Android device: '${ADB_DEVICE}' will take a few..."
 
+# Make sure that the developer settings are enabled:
+ adb -s ${ADB_DEVICE} -d shell settings put global development_settings_enabled 1
+
 #Speed up the network + improve battery life:
  adb -s ${ADB_DEVICE} -d shell settings put system multicore_packet_scheduler 1
  adb -s ${ADB_DEVICE} -d shell settings put global network_scoring_ui_enabled 0
 
-#Make animations twice as fast ( need developer options enabled ):
+#Make animations twice as fast ( need developer settings enabled ):
  adb -s ${ADB_DEVICE} -d shell settings put global window_animation_scale 0.5
  adb -s ${ADB_DEVICE} -d shell settings put global transition_animation_scale 0.5
  adb -s ${ADB_DEVICE} -d shell settings put global animator_duration_scale 0.5
@@ -40,10 +43,13 @@ echo "Optimizing the Android device: '${ADB_DEVICE}' will take a few..."
   adb -s ${ADB_DEVICE} -d shell settings put global burn_in_protection 1
 
 # Improve touch screen responsiveness:
-  adb -s ${ADB_DEVICE} -d shell settings put secure long_press_timeout 250
-  adb -s ${ADB_DEVICE} -d shell settings put secure multi_press_timeout 250
+  adb -s ${ADB_DEVICE} -d shell settings put secure long_press_timeout 100
+  adb -s ${ADB_DEVICE} -d shell settings put secure multi_press_timeout 100
   adb -s ${ADB_DEVICE} -d shell settings put secure tap_duration_threshold 0.0 
   adb -s ${ADB_DEVICE} -d shell settings put secure touch_blocking_period 0.0
+
+# Disable transparency, only needed for older phones:
+  adb -s ${ADB_DEVICE} -d shell settings put system enable_transparency_effects 0
 
 # Optimize all apps:
   echo "Optimizing apps... Will take a while."
@@ -65,3 +71,4 @@ echo "Optimizing the Android device: '${ADB_DEVICE}' will take a few..."
 # Clear all log files ( should do this after every update to keep the device snappy ):
   adb -s ${ADB_DEVICE} -d shell logcat -b all -c
 
+ 
