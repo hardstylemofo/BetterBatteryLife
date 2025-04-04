@@ -12,7 +12,9 @@ In addition to this the app will also:
 
 
 The first time you install the APK, __you must ENABLE USB DEBUGGING & paste these commands ( all in once ) into your terminal with your phone attached:__
+
   adb devices
+  
     Output:
       List of devices attached
       LMV600VMf50e972b	device
@@ -20,8 +22,11 @@ The first time you install the APK, __you must ENABLE USB DEBUGGING & paste thes
     - Replace: LMV600VMf50e972b with the value shown for your output.
   
   adb -s LMV600VMf50e972b -d shell am force-stop com.MichaelAnzalone.BetterBatteryLife
+  
   adb -s LMV600VMf50e972b -d shell pm grant com.MichaelAnzalone.BetterBatteryLife android.permission.WRITE_SECURE_SETTINGS
+  
   adb -s LMV600VMf50e972b -d shell dumpsys deviceidle sys-whitelist +com.MichaelAnzalone.BetterBatteryLife
+  
   - On some phones like LG/Samsung that have their own battery optimiziation, you must also exclude this in the battery app from power savings &
      the app may not show up in the dumpsys whitelist, but the above commands are still necessary. 
   
