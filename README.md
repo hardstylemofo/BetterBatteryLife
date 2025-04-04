@@ -31,5 +31,6 @@ The first time you install the APK, __you must ENABLE USB DEBUGGING & paste thes
      the app may not show up in the dumpsys whitelist, but the above commands are still necessary. 
   
   - Once this is done, you can disable usb debugging in the settings on your phone and run the application.
+    
   -- You won't need to run these commands when upgrading the application, but you will if you uninstall/re-install the application.
 
