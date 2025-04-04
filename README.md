@@ -34,3 +34,9 @@ The first time you install the APK, __you must ENABLE USB DEBUGGING & paste thes
     
   -- You won't need to run these commands when upgrading the application, but you will if you uninstall/re-install the application.
 
+  Optional performance tweaks:
+    
+    Clear all log files ( should do this after every update to keep the device snappy ):
+      adb -s LMV600VMf50e972b -d shell logcat -b all -c
+
+
